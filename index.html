@@ -23,7 +23,7 @@
     padding-bottom:env(safe-area-inset-bottom,0px);
   }
   *,*::before,*::after{box-sizing:border-box}
-  html{scroll-padding-top:calc(72px + env(safe-area-inset-top,0px));-webkit-text-size-adjust:100%}
+  html{scroll-padding-top:calc(96px + env(safe-area-inset-top,0px));-webkit-text-size-adjust:100%}
   body{
     margin:0;
     background:var(--black);
@@ -47,9 +47,9 @@
     background:rgba(0,0,0,.86);backdrop-filter:blur(8px);
     border-bottom:1px solid var(--rule);
   }
-  .bar{display:flex;align-items:center;gap:2rem;height:72px}
+  .bar{display:flex;align-items:center;gap:2rem;height:96px}
   .logo{display:flex;align-items:center;text-decoration:none}
-  .logo img{height:40px;width:auto;display:block}
+  .logo img{height:76px;width:auto;display:block}
   nav{margin-left:auto;display:flex;gap:1.8rem;align-items:center}
   nav a{font-family:"Bricolage Grotesque",sans-serif;font-size:.92rem;font-weight:500;color:var(--silver);text-decoration:none}
   nav a:hover,nav a:focus-visible{color:var(--gold-bright)}
@@ -160,6 +160,8 @@
     .hero-grid,.svc-item{grid-template-columns:1fr}
     .steps,.talk{grid-template-columns:1fr}
     nav a:not(.btn){display:none}
+    .bar{height:76px}
+    .logo img{height:56px}
   }
   @media (prefers-reduced-motion:reduce){
     .row{opacity:1;transform:none;animation:none}
@@ -369,91 +371,33 @@
     </div>
   </section>
 
-  <div class="modal-overlay" id="bookModal" aria-hidden="true">
-  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="bookModalTitle">
-    <button class="modal-close" id="bookModalClose" aria-label="Close">&times;</button>
-
-    <div id="bookModalForm">
-      <h2 id="bookModalTitle">Fill in your details for a call back</h2>
-      <p class="modal-sub">Takes about 20 seconds. We'll be in touch to find a time that works.</p>
-
-      <div id="ghlFormEmbed">
-        <iframe
-          src="https://api.leadconnectorhq.com/widget/form/4Yx5dhQuS9mnMp8WFXxP"
-          style="width:100%;height:480px;border:none;display:block"
-          id="inline-4Yx5dhQuS9mnMp8WFXxP"
-          data-layout="{'id':'INLINE'}"
-          data-trigger-type="alwaysShow"
-          data-trigger-value=""
-          data-activation-type="alwaysActivated"
-          data-activation-value=""
-          data-deactivation-type="neverDeactivate"
-          data-deactivation-value=""
-          data-form-name="Vicortis — Call back request"
-          data-height="480"
-          data-layout-iframe-id="inline-4Yx5dhQuS9mnMp8WFXxP"
-          data-form-id="4Yx5dhQuS9mnMp8WFXxP"
-          title="Vicortis — Call back request">
-        </iframe>
-      </div>
-    </div>
-
-    <div class="modal-thanks" id="bookModalThanks" style="display:none">
-      <h2>Thanks — got it</h2>
-      <p>We'll be in touch shortly to arrange your call.</p>
-      <button type="button" class="modal-submit" id="bookModalDone">Done</button>
-    </div>
-  </div>
-</div>
-
-<script src="https://link.msgsndr.com/js/form_embed.js"></script>
 <script>
 (function(){
-  var overlay = document.getElementById("bookModal");
-  var closeBtn = document.getElementById("bookModalClose");
-  var doneBtn = document.getElementById("bookModalDone");
-  var formView = document.getElementById("bookModalForm");
-  var thanksView = document.getElementById("bookModalThanks");
-  var triggers = document.querySelectorAll('a.btn[href="#book"]');
-
-  function openModal(){
-    formView.style.display = "block";
-    thanksView.style.display = "none";
-    overlay.classList.add("open");
-    overlay.setAttribute("aria-hidden", "false");
-    document.body.style.overflow = "hidden";
-  }
-  function closeModal(){
-    overlay.classList.remove("open");
-    overlay.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "";
-  }
+  var BOOKING_URL = "https://api.leadconnectorhq.com/widget/form/4Yx5dhQuS9mnMp8WFXxP";
+  var triggers = document.querySelectorAll('a[href="#book"]');
 
   triggers.forEach(function(btn){
+    // Real fallback: if popups are blocked or JS fails, the link still
+    // goes straight to the booking form instead of going nowhere.
+    btn.setAttribute("href", BOOKING_URL);
+    btn.setAttribute("target", "_blank");
+    btn.setAttribute("rel", "noopener noreferrer");
+
     btn.addEventListener("click", function(e){
       e.preventDefault();
-      openModal();
+      var w = 480, h = 720;
+      var left = (window.screen.width - w) / 2;
+      var top = (window.screen.height - h) / 2;
+      var popup = window.open(
+        BOOKING_URL,
+        "vicortisBooking",
+        "width=" + w + ",height=" + h + ",left=" + left + ",top=" + top + ",resizable=yes,scrollbars=yes,noopener,noreferrer"
+      );
+      // Popup blocked (common on mobile/some browsers) — fall back to a normal tab.
+      if(!popup){
+        window.open(BOOKING_URL, "_blank", "noopener,noreferrer");
+      }
     });
-  });
-
-  closeBtn.addEventListener("click", closeModal);
-  overlay.addEventListener("click", function(e){
-    if(e.target === overlay) closeModal();
-  });
-  document.addEventListener("keydown", function(e){
-    if(e.key === "Escape" && overlay.classList.contains("open")) closeModal();
-  });
-
-  doneBtn.addEventListener("click", closeModal);
-
-  // GHL forms broadcast a postMessage on successful submission.
-  // This listens for it and swaps to the thank-you view automatically —
-  // no change needed here once you've pasted your embed code above.
-  window.addEventListener("message", function(e){
-    if(e.data && (e.data.type === "form-submit" || e.data.formSubmitted)){
-      formView.style.display = "none";
-      thanksView.style.display = "block";
-    }
   });
 })();
 </script>
@@ -464,7 +408,7 @@
 <footer>
   <div class="wrap foot">
     <span>Vicortis — AI growth for small businesses</span>
-    <a href="#book">enquiries@vicortis.co.uk</a>
+    <a href="mailto:enquiries@vicortis.com">enquiries@vicortis.com</a>
     <span class="r">Cardiff, Wales · © 2026 Vicortis Ltd</span>
   </div>
 </footer>
